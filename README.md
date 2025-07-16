@@ -1,15 +1,15 @@
 # 3D Editor - Bibliothèque JavaScript Pure et Modulaire
 
-Une bibliothèque 3D complète et indépendante de tout framework, combinant :
+Une bibliothèque 3D **100% JavaScript pur** et **framework-agnostic** qui combine :
 - **Workflow fluide de Unity** pour les transformations d'objets
 - **Templates immersifs et avatars de Spatial.io** 
 - **Fonctionnalités d'exposition de VExhibition**
 
 ## 🎯 Objectif Principal
 
-Créer une bibliothèque JavaScript **pure et modulaire** qui peut être intégrée facilement dans n'importe quelle technologie (React, Vue, Angular, vanilla JS, etc.).
+Créer une bibliothèque JavaScript **pure, modulaire et indépendante** qui peut être intégrée facilement dans n'importe quelle technologie (React, Vue, Angular, vanilla JS, etc.).
 
-## 🏗️ Architecture
+## 🏗️ Architecture Modulaire
 
 ```
 lib/
@@ -25,9 +25,11 @@ examples/
 ├── vanilla-js/             # Exemple JavaScript pur
 ├── react-integration/      # Exemple intégration React
 └── vue-integration/        # Exemple intégration Vue.js
+
+index.html                  # Démonstration principale
 ```
 
-## 🚀 Installation et Utilisation
+## 🚀 Utilisation Immédiate
 
 ### JavaScript Pur (Vanilla)
 
@@ -38,7 +40,7 @@ examples/
     <title>Mon Éditeur 3D</title>
 </head>
 <body>
-    <div id="canvas-container"></div>
+    <div id="canvas-container" style="width: 100%; height: 500px;"></div>
     
     <script type="module">
         import Editor3D from './lib/3DEditor.js';
@@ -47,7 +49,7 @@ examples/
         const container = document.getElementById('canvas-container');
         const editor = new Editor3D(container);
         
-        // Ajouter des objets
+        // Ajouter des objets (Unity-style)
         const cubeId = editor.addCube({
             position: { x: 0, y: 0.5, z: 0 },
             color: 0x4F46E5
@@ -57,105 +59,41 @@ examples/
         editor.makeObjectInteractive(cubeId, {
             onClick: (object) => {
                 console.log('Cube cliqué!');
+                editor.selectObject(object.userData.id);
             }
         });
         
-        // Créer un avatar
+        // Créer un avatar (Spatial.io-style)
         editor.createAvatar({
-            position: { x: 2, y: 0, z: 0 }
+            position: { x: 2, y: 0, z: 0 },
+            bodyColor: 0x4A90E2
         });
         
-        // Créer une salle d'exposition
+        // Créer une salle d'exposition (VExhibition-style)
         editor.createExhibitionRoom({
             width: 10,
             height: 3,
-            depth: 10
+            depth: 10,
+            wallColor: 0xffffff
+        });
+        
+        // Ajouter une œuvre d'art
+        editor.addArtwork({
+            width: 1.5,
+            height: 1,
+            position: { x: -4, y: 1.5, z: 0 },
+            title: 'Mon Œuvre',
+            artist: 'Artiste',
+            color: 0xff6b6b
         });
     </script>
 </body>
 </html>
 ```
 
-### Intégration React
+## 🎮 API Complète
 
-```jsx
-import React, { useEffect, useRef } from 'react';
-import Editor3D from './lib/3DEditor.js';
-
-const MyComponent = () => {
-  const containerRef = useRef(null);
-  const editorRef = useRef(null);
-
-  useEffect(() => {
-    // Initialiser l'éditeur
-    editorRef.current = new Editor3D(containerRef.current);
-    
-    // Écouter les événements
-    editorRef.current.on('objectClicked', (data) => {
-      console.log('Objet cliqué:', data);
-    });
-
-    return () => {
-      editorRef.current.dispose();
-    };
-  }, []);
-
-  const addCube = () => {
-    editorRef.current.addCube({
-      position: { x: Math.random() * 4 - 2, y: 0.5, z: Math.random() * 4 - 2 }
-    });
-  };
-
-  return (
-    <div>
-      <div ref={containerRef} style={{ width: '100%', height: '500px' }} />
-      <button onClick={addCube}>Ajouter Cube</button>
-    </div>
-  );
-};
-```
-
-### Intégration Vue.js
-
-```vue
-<template>
-  <div>
-    <div ref="canvasContainer" class="canvas-container"></div>
-    <button @click="addCube">Ajouter Cube</button>
-  </div>
-</template>
-
-<script>
-import Editor3D from './lib/3DEditor.js';
-
-export default {
-  data() {
-    return {
-      editor: null
-    };
-  },
-  mounted() {
-    this.editor = new Editor3D(this.$refs.canvasContainer);
-  },
-  beforeUnmount() {
-    if (this.editor) {
-      this.editor.dispose();
-    }
-  },
-  methods: {
-    addCube() {
-      this.editor.addCube({
-        position: { x: 0, y: 0.5, z: 0 }
-      });
-    }
-  }
-};
-</script>
-```
-
-## 🎮 API Principale
-
-### Gestion des Objets 3D
+### Gestion des Objets 3D (Unity-style)
 
 ```javascript
 // Ajouter des primitives
@@ -165,61 +103,84 @@ const cylinderId = editor.addCylinder(options);
 
 // Manipuler les objets
 editor.selectObject(id);
-editor.updateObject(id, { position: { x: 1, y: 0, z: 0 } });
+editor.updateObject(id, { 
+    position: { x: 1, y: 0, z: 0 },
+    rotation: { x: 0, y: Math.PI/4, z: 0 },
+    scale: { x: 1.5, y: 1.5, z: 1.5 }
+});
 editor.removeObject(id);
 
-// Modes de transformation (style Unity)
+// Modes de transformation Unity
 editor.setTransformMode('translate'); // W
 editor.setTransformMode('rotate');    // E
 editor.setTransformMode('scale');     // R
 ```
 
-### Système d'Avatars (inspiré Spatial.io)
+### Système d'Avatars (Spatial.io-style)
 
 ```javascript
 // Créer un avatar simple
 const avatarId = editor.createAvatar({
-  position: { x: 0, y: 0, z: 0 },
-  bodyColor: 0x4A90E2
+    position: { x: 0, y: 0, z: 0 },
+    bodyColor: 0x4A90E2,
+    skinColor: 0xFFDBB3
 });
 
-// Charger un avatar depuis un fichier
-editor.loadAvatarFromFile(file, options)
-  .then(avatarId => {
+// Charger un avatar 3D depuis un fichier GLB/GLTF
+editor.loadAvatarFromFile(file, {
+    position: { x: 0, y: 0, z: 0 },
+    height: 1.8
+}).then(avatarId => {
     console.log('Avatar chargé:', avatarId);
-  });
+});
 
-// Déplacer un avatar
+// Déplacer un avatar avec animation
 editor.moveAvatar(avatarId, { x: 5, y: 0, z: 5 }, 2000);
+
+// Faire regarder un avatar vers une direction
+editor.avatars.lookAt(avatarId, { x: 0, y: 0, z: 0 });
 ```
 
-### Système d'Exposition (inspiré VExhibition)
+### Système d'Exposition (VExhibition-style)
 
 ```javascript
 // Créer une salle d'exposition
 const roomId = editor.createExhibitionRoom({
-  width: 10,
-  height: 3,
-  depth: 8,
-  wallColor: 0xffffff,
-  floorColor: 0xf0f0f0
+    width: 10,
+    height: 3,
+    depth: 8,
+    wallColor: 0xffffff,
+    floorColor: 0xf0f0f0,
+    ceilingColor: 0xfafafa
 });
 
-// Ajouter une œuvre d'art
+// Ajouter une œuvre d'art avec cadre
 const artworkId = editor.addArtwork({
-  width: 1.5,
-  height: 1,
-  position: { x: -4, y: 1.5, z: 0 },
-  title: 'Mon Œuvre',
-  artist: 'Artiste',
-  imageUrl: 'path/to/image.jpg'
+    width: 1.5,
+    height: 1,
+    position: { x: -4, y: 1.5, z: 0 },
+    title: 'Mon Œuvre',
+    artist: 'Artiste',
+    description: 'Description de l\'œuvre',
+    imageUrl: 'path/to/image.jpg', // Optionnel
+    frameColor: 0x8B4513
 });
 
-// Ajouter un éclairage d'exposition
+// Ajouter un éclairage d'exposition professionnel
 editor.addExhibitionLighting({
-  position: { x: 0, y: 2.5, z: 2 },
-  target: { x: -4, y: 1.5, z: 0 }
+    position: { x: 0, y: 2.5, z: 2 },
+    target: { x: -4, y: 1.5, z: 0 },
+    intensity: 1.5,
+    color: 0xffffff
 });
+
+// Créer un parcours de visite
+const points = [
+    { x: -3, y: 0.1, z: -3 },
+    { x: 0, y: 0.1, z: -3 },
+    { x: 3, y: 0.1, z: 0 }
+];
+editor.exhibitions.createVisitPath(points);
 ```
 
 ### Système d'Interactions
@@ -227,97 +188,108 @@ editor.addExhibitionLighting({
 ```javascript
 // Rendre un objet interactif
 editor.makeObjectInteractive(objectId, {
-  onClick: (object, event) => {
-    console.log('Objet cliqué!');
-  },
-  onHover: (object) => {
-    console.log('Survol commencé');
-  },
-  hoverColor: 0x00ff00
+    onClick: (object, event) => {
+        console.log('Objet cliqué!');
+    },
+    onHover: (object) => {
+        console.log('Survol commencé');
+    },
+    onHoverEnd: (object) => {
+        console.log('Survol terminé');
+    },
+    hoverColor: 0x00ff00
 });
 
 // Créer un bouton 3D
 editor.create3DButton('Cliquez-moi!', 
-  { x: 2, y: 1, z: 2 },
-  {
-    onClick: () => alert('Bouton cliqué!')
-  }
+    { x: 2, y: 1, z: 2 },
+    {
+        width: 2,
+        height: 0.6,
+        onClick: () => alert('Bouton cliqué!')
+    }
 );
 
-// Créer une zone d'interaction
+// Créer une zone d'interaction invisible
 editor.createInteractionZone(
-  { x: 0, y: 0.5, z: -2 },  // position
-  { x: 2, y: 1, z: 2 },     // taille
-  {
-    onClick: () => console.log('Zone activée!')
-  }
+    { x: 0, y: 0.5, z: -2 },  // position
+    { x: 2, y: 1, z: 2 },     // taille
+    {
+        onClick: () => console.log('Zone activée!'),
+        debug: true // Afficher la zone en mode debug
+    }
 );
 ```
 
-## 🎯 Événements
+## 🎯 Système d'Événements
 
 ```javascript
 // Écouter les événements
 editor.on('objectAdded', (data) => {
-  console.log('Objet ajouté:', data.id);
+    console.log('Objet ajouté:', data.id, data.type);
 });
 
 editor.on('objectSelected', (data) => {
-  console.log('Objet sélectionné:', data.id);
+    console.log('Objet sélectionné:', data.id);
 });
 
 editor.on('objectClicked', (data) => {
-  console.log('Objet cliqué:', data.object);
+    console.log('Objet cliqué:', data.object);
 });
 
 editor.on('avatarCreated', (data) => {
-  console.log('Avatar créé:', data.id);
+    console.log('Avatar créé:', data.id);
+});
+
+editor.on('transformModeChanged', (data) => {
+    console.log('Mode changé:', data.mode);
 });
 ```
 
 ## 💾 Export/Import
 
 ```javascript
-// Exporter la scène
+// Exporter la scène complète
 const sceneData = editor.exportScene();
 const blob = new Blob([sceneData], { type: 'application/json' });
 
 // Importer une scène
 editor.importScene(sceneData);
 
-// Exporter une exposition
+// Exporter spécifiquement une exposition
 const exhibitionData = editor.exportExhibition();
 ```
 
-## 🎮 Contrôles
+## 🎮 Contrôles (Unity-style)
 
-### Raccourcis Clavier (style Unity)
-- **W** : Mode déplacement
+### Raccourcis Clavier
+- **W** : Mode déplacement (translate)
 - **E** : Mode rotation  
-- **R** : Mode échelle
+- **R** : Mode échelle (scale)
 - **Delete/Backspace** : Supprimer l'objet sélectionné
 
 ### Contrôles Souris
 - **Clic gauche** : Sélectionner un objet
 - **Clic droit** : Menu contextuel (si configuré)
 - **Double-clic** : Action personnalisée
-- **Molette** : Zoom
-- **Glisser** : Rotation de la caméra
+- **Molette** : Zoom caméra
+- **Glisser** : Rotation de la caméra (OrbitControls)
 
 ## 🔧 Configuration
 
 ```javascript
 const editor = new Editor3D(container, {
-  enableShadows: true,        // Activer les ombres
-  enableGrid: true,           // Afficher la grille
-  backgroundColor: 0x1a1a1a,  // Couleur de fond
-  // ... autres options
+    enableShadows: true,        // Activer les ombres
+    enableGrid: true,           // Afficher la grille
+    backgroundColor: 0x2a2a2a,  // Couleur de fond
+    // ... autres options
 });
 ```
 
-## 📊 Statistiques
+## 📊 Statistiques et Utilitaires
 
 ```javascript
+// Obtenir les statistiques
 const stats = editor.getStats();
 console.log(stats);
 // {
@@ -326,6 +298,9 @@ console.log(stats);
 //   exhibitions: 1,
 //   artworks: 3
 // }
+
+// Version de la bibliothèque
+console.log(editor.getVersion()); // "1.0.0"
 ```
 
 ## 🧹 Nettoyage
@@ -335,24 +310,36 @@ console.log(stats);
 editor.dispose();
 ```
 
-## 🌟 Avantages
+## 🌟 Avantages Clés
 
-✅ **Framework-agnostic** : Fonctionne avec React, Vue, Angular, vanilla JS  
-✅ **Modulaire** : Utilisez seulement les modules dont vous avez besoin  
-✅ **Workflow Unity** : Contrôles familiers et intuitifs  
-✅ **Avatars immersifs** : Système d'avatars inspiré de Spatial.io  
-✅ **Expositions virtuelles** : Créez des galeries comme VExhibition  
-✅ **Interactions riches** : Système d'événements complet  
+✅ **100% JavaScript Pur** : Aucune dépendance à un framework  
+✅ **Framework-Agnostic** : Fonctionne avec React, Vue, Angular, vanilla JS  
+✅ **Modulaire** : Utilisez seulement les modules nécessaires  
+✅ **Unity Workflow** : Contrôles familiers et intuitifs (W/E/R)  
+✅ **Avatars Immersifs** : Système d'avatars inspiré de Spatial.io  
+✅ **Expositions Virtuelles** : Créez des galeries comme VExhibition  
+✅ **Interactions Riches** : Système d'événements complet  
 ✅ **Export/Import** : Sauvegardez et chargez vos créations  
 ✅ **Performance** : Basé sur Three.js optimisé  
+✅ **Extensible** : Architecture modulaire pour ajouts futurs  
 
-## 🚀 Exemples Complets
+## 🚀 Démarrage Rapide
 
-Consultez le dossier `examples/` pour des implémentations complètes :
-- `vanilla-js/` : Exemple JavaScript pur
-- `react-integration/` : Intégration React
-- `vue-integration/` : Intégration Vue.js
+1. **Cloner le projet**
+2. **Ouvrir `index.html`** dans un navigateur moderne
+3. **Tester l'éditeur** avec l'interface complète
+4. **Consulter les exemples** dans le dossier `examples/`
 
-## 📝 Licence
+## 📝 Intégrations Disponibles
 
-MIT License - Utilisez librement dans vos projets !
+- **Vanilla JavaScript** : `examples/vanilla-js/`
+- **React** : `examples/react-integration/`
+- **Vue.js** : `examples/vue-integration/`
+
+## 📄 Licence
+
+MIT License - Utilisez librement dans vos projets étudiants et professionnels !
+
+---
+
+**Cette bibliothèque est 100% JavaScript pur et peut être intégrée dans n'importe quel projet sans dépendance à un framework spécifique.**

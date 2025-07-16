@@ -1,23 +1,567 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Editor</title>
-    <meta name="description" content="A 3D scene editor for virtual environments." />
-    <meta name="author" content="Amana" />
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Editor - Bibliothèque JavaScript Pure</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            background: linear-gradient(45deg, #4F46E5, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-info {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section h3 {
+            margin: 0 0 15px 0;
+            color: #4F46E5;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(79, 70, 229, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .btn-full {
+            grid-column: 1 / -1;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .stats div {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stats .value {
+            color: #4F46E5;
+            font-weight: bold;
+        }
+        
+        .selected-info {
+            background: rgba(79, 70, 229, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .shortcuts {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .shortcuts strong {
+            color: #4F46E5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>3D Editor - Bibliothèque JavaScript Pure</h1>
+            <div class="header-info">
+                <span>Framework-Agnostic</span>
+                <span>•</span>
+                <span>Modulaire</span>
+                <span>•</span>
+                <span id="version">v1.0.0</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="canvas-container" id="canvas-container"></div>
+            
+            <div class="sidebar">
+                <div class="section">
+                    <h3>🎲 Objets 3D</h3>
+                    <div class="button-grid">
+                        <button class="btn" onclick="addCube()">Cube</button>
+                        <button class="btn" onclick="addSphere()">Sphère</button>
+                        <button class="btn" onclick="addCylinder()">Cylindre</button>
+                        <button class="btn" onclick="addPlane()">Plan</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>👤 Avatars</h3>
+                    <div class="button-grid">
+                        <button class="btn" onclick="createAvatar()">Créer Avatar</button>
+                        <button class="btn btn-success" onclick="document.getElementById('avatar-file').click()">
+                            Charger GLB
+                        </button>
+                    </div>
+                    <input type="file" id="avatar-file" class="file-input" accept=".glb,.gltf" onchange="loadAvatar(this)">
+                </div>
+                
+                <div class="section">
+                    <h3>🏛️ Exposition</h3>
+                    <div class="button-grid">
+                        <button class="btn" onclick="createRoom()">Salle</button>
+                        <button class="btn" onclick="addArtwork()">Œuvre</button>
+                        <button class="btn" onclick="addLighting()">Éclairage</button>
+                        <button class="btn" onclick="createPath()">Parcours</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>⚡ Interactions</h3>
+                    <div class="button-grid">
+                        <button class="btn" onclick="create3DButton()">Bouton 3D</button>
+                        <button class="btn" onclick="createZone()">Zone</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>🛠️ Outils (Unity Style)</h3>
+                    <div class="button-grid">
+                        <button class="btn" onclick="setMode('translate')" id="btn-translate">Déplacer (W)</button>
+                        <button class="btn" onclick="setMode('rotate')" id="btn-rotate">Rotation (E)</button>
+                        <button class="btn" onclick="setMode('scale')" id="btn-scale">Échelle (R)</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>💾 Scène</h3>
+                    <div class="button-grid">
+                        <button class="btn btn-success" onclick="exportScene()">Exporter</button>
+                        <button class="btn btn-warning" onclick="document.getElementById('scene-file').click()">
+                            Importer
+                        </button>
+                        <button class="btn btn-full" onclick="clearScene()">Vider Scène</button>
+                    </div>
+                    <input type="file" id="scene-file" class="file-input" accept=".json" onchange="importScene(this)">
+                </div>
+                
+                <div class="section">
+                    <h3>📊 Statistiques</h3>
+                    <div class="stats">
+                        <div>Objets: <span class="value" id="object-count">0</span></div>
+                        <div>Avatars: <span class="value" id="avatar-count">0</span></div>
+                        <div>Expositions: <span class="value" id="exhibition-count">0</span></div>
+                        <div>Œuvres: <span class="value" id="artwork-count">0</span></div>
+                    </div>
+                    <div id="selected-info" class="selected-info" style="display: none;">
+                        <strong>Sélectionné:</strong> <span id="selected-id"></span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>⌨️ Raccourcis</h3>
+                    <div class="shortcuts">
+                        <strong>W</strong> - Mode déplacement<br>
+                        <strong>E</strong> - Mode rotation<br>
+                        <strong>R</strong> - Mode échelle<br>
+                        <strong>Delete</strong> - Supprimer objet<br>
+                        <strong>Clic</strong> - Sélectionner<br>
+                        <strong>Molette</strong> - Zoom caméra
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <meta property="og:title" content="3D Editor" />
-    <meta property="og:description" content="A 3D scene editor for virtual environments." />
-    <meta property="og:type" content="website" />
-    <!-- Optionally add your own og:image here -->
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <!-- Optionally add your own twitter:site and twitter:image here -->
-  </head>
-
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <script type="module">
+        import Editor3D from './lib/3DEditor.js';
+        
+        // Initialiser l'éditeur 3D
+        const container = document.getElementById('canvas-container');
+        const editor = new Editor3D(container, {
+            enableShadows: true,
+            enableGrid: true,
+            backgroundColor: 0x2a2a2a
+        });
+        
+        // Variables globales
+        window.editor = editor;
+        let currentMode = 'translate';
+        
+        // Mettre à jour les statistiques
+        function updateStats() {
+            const stats = editor.getStats();
+            document.getElementById('object-count').textContent = stats.objects;
+            document.getElementById('avatar-count').textContent = stats.avatars;
+            document.getElementById('exhibition-count').textContent = stats.exhibitions;
+            document.getElementById('artwork-count').textContent = stats.artworks;
+            document.getElementById('version').textContent = `v${editor.getVersion()}`;
+        }
+        
+        // Mettre à jour l'interface du mode actuel
+        function updateModeUI(mode) {
+            // Reset tous les boutons
+            ['translate', 'rotate', 'scale'].forEach(m => {
+                const btn = document.getElementById(`btn-${m}`);
+                btn.style.background = 'linear-gradient(135deg, #4F46E5, #7C3AED)';
+            });
+            
+            // Highlight le mode actuel
+            const activeBtn = document.getElementById(`btn-${mode}`);
+            activeBtn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+            currentMode = mode;
+        }
+        
+        // Fonctions pour les objets 3D
+        window.addCube = () => {
+            const id = editor.addCube({
+                position: { x: Math.random() * 4 - 2, y: 0.5, z: Math.random() * 4 - 2 },
+                color: Math.random() * 0xffffff
+            });
+            makeObjectInteractive(id);
+        };
+        
+        window.addSphere = () => {
+            const id = editor.addSphere({
+                position: { x: Math.random() * 4 - 2, y: 0.5, z: Math.random() * 4 - 2 },
+                color: Math.random() * 0xffffff
+            });
+            makeObjectInteractive(id);
+        };
+        
+        window.addCylinder = () => {
+            const id = editor.addCylinder({
+                position: { x: Math.random() * 4 - 2, y: 0.5, z: Math.random() * 4 - 2 },
+                color: Math.random() * 0xffffff
+            });
+            makeObjectInteractive(id);
+        };
+        
+        window.addPlane = () => {
+            const id = editor.addObject('plane', {
+                position: { x: Math.random() * 4 - 2, y: 0, z: Math.random() * 4 - 2 },
+                color: Math.random() * 0xffffff
+            });
+            makeObjectInteractive(id);
+        };
+        
+        // Rendre un objet interactif
+        function makeObjectInteractive(id) {
+            editor.makeObjectInteractive(id, {
+                onClick: (object) => {
+                    editor.selectObject(object.userData.id);
+                    showSelectedInfo(object.userData.id);
+                },
+                hoverColor: 0x00ff00
+            });
+        }
+        
+        // Afficher les infos de l'objet sélectionné
+        function showSelectedInfo(id) {
+            document.getElementById('selected-info').style.display = 'block';
+            document.getElementById('selected-id').textContent = id;
+        }
+        
+        // Fonctions pour les avatars
+        window.createAvatar = () => {
+            editor.createAvatar({
+                position: { x: Math.random() * 4 - 2, y: 0, z: Math.random() * 4 - 2 },
+                bodyColor: Math.random() * 0xffffff,
+                skinColor: 0xFFDBB3
+            });
+        };
+        
+        window.loadAvatar = (input) => {
+            const file = input.files[0];
+            if (file) {
+                editor.loadAvatarFromFile(file, {
+                    position: { x: 0, y: 0, z: 0 },
+                    height: 1.8
+                }).then(() => {
+                    console.log('Avatar chargé avec succès');
+                }).catch(error => {
+                    console.error('Erreur lors du chargement:', error);
+                    alert('Erreur lors du chargement de l\'avatar');
+                });
+            }
+        };
+        
+        // Fonctions pour les expositions
+        window.createRoom = () => {
+            editor.createExhibitionRoom({
+                width: 10,
+                height: 3,
+                depth: 8,
+                wallColor: 0xf5f5f5,
+                floorColor: 0xe8e8e8,
+                ceilingColor: 0xfafafa
+            });
+        };
+        
+        window.addArtwork = () => {
+            editor.addArtwork({
+                width: 1.5,
+                height: 1.2,
+                position: { x: -4, y: 1.5, z: Math.random() * 2 - 1 },
+                title: `Œuvre ${Date.now()}`,
+                artist: 'Artiste Virtuel',
+                color: Math.random() * 0xffffff,
+                frameColor: 0x8B4513
+            });
+        };
+        
+        window.addLighting = () => {
+            editor.addExhibitionLighting({
+                position: { x: Math.random() * 4 - 2, y: 2.5, z: Math.random() * 4 - 2 },
+                target: { x: -4, y: 1.5, z: 0 },
+                intensity: 1.2,
+                color: 0xffffff
+            });
+        };
+        
+        window.createPath = () => {
+            const points = [
+                { x: -3, y: 0.1, z: -3 },
+                { x: 0, y: 0.1, z: -3 },
+                { x: 3, y: 0.1, z: 0 },
+                { x: 0, y: 0.1, z: 3 },
+                { x: -3, y: 0.1, z: 3 }
+            ];
+            editor.exhibitions.createVisitPath(points, {
+                color: 0x00ff00,
+                opacity: 0.7
+            });
+        };
+        
+        // Fonctions pour les interactions
+        window.create3DButton = () => {
+            editor.create3DButton('Cliquez-moi!', 
+                { x: 2, y: 1, z: 2 },
+                {
+                    width: 2,
+                    height: 0.6,
+                    color: 0x4F46E5,
+                    hoverColor: 0x7C3AED,
+                    onClick: () => {
+                        alert('Bouton 3D JavaScript pur cliqué!');
+                    }
+                }
+            );
+        };
+        
+        window.createZone = () => {
+            editor.createInteractionZone(
+                { x: 0, y: 0.5, z: -3 },
+                { x: 2, y: 1, z: 2 },
+                {
+                    onClick: () => {
+                        console.log('Zone interactive activée!');
+                        alert('Zone interactive JavaScript pur!');
+                    },
+                    debug: true
+                }
+            );
+        };
+        
+        // Fonctions pour les outils
+        window.setMode = (mode) => {
+            editor.setTransformMode(mode);
+            updateModeUI(mode);
+        };
+        
+        // Fonctions pour la scène
+        window.exportScene = () => {
+            const sceneData = editor.exportScene();
+            const blob = new Blob([sceneData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scene_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        window.importScene = (input) => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        editor.importScene(e.target.result);
+                        console.log('Scène importée avec succès');
+                    } catch (error) {
+                        console.error('Erreur lors de l\'import:', error);
+                        alert('Erreur lors de l\'import de la scène');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        
+        window.clearScene = () => {
+            if (confirm('Êtes-vous sûr de vouloir vider la scène ?')) {
+                // Supprimer tous les objets
+                const stats = editor.getStats();
+                editor.engine.objects.forEach((obj, id) => {
+                    editor.removeObject(id);
+                });
+                
+                // Réinitialiser les systèmes
+                editor.avatars.dispose();
+                editor.exhibitions.dispose();
+                editor.interactions.dispose();
+                
+                // Réinitialiser les modules
+                editor.avatars = new editor.constructor.AvatarSystem(editor.engine);
+                editor.exhibitions = new editor.constructor.ExhibitionSystem(editor.engine);
+                editor.interactions = new editor.constructor.InteractionSystem(editor.engine);
+                
+                updateStats();
+                document.getElementById('selected-info').style.display = 'none';
+            }
+        };
+        
+        // Écouter les événements de l'éditeur
+        editor.on('objectAdded', updateStats);
+        editor.on('objectRemoved', updateStats);
+        editor.on('avatarCreated', updateStats);
+        editor.on('exhibitionRoomCreated', updateStats);
+        editor.on('artworkAdded', updateStats);
+        
+        editor.on('objectSelected', (data) => {
+            showSelectedInfo(data.id);
+        });
+        
+        editor.on('objectDeselected', () => {
+            document.getElementById('selected-info').style.display = 'none';
+        });
+        
+        editor.on('transformModeChanged', (data) => {
+            updateModeUI(data.mode);
+        });
+        
+        // Initialiser l'interface
+        updateStats();
+        updateModeUI('translate');
+        
+        // Ajouter quelques objets de démonstration
+        setTimeout(() => {
+            // Cube de démonstration
+            const cubeId = editor.addCube({
+                position: { x: -1, y: 0.5, z: 0 },
+                color: 0x4F46E5
+            });
+            makeObjectInteractive(cubeId);
+            
+            // Sphère de démonstration
+            const sphereId = editor.addSphere({
+                position: { x: 1, y: 0.5, z: 0 },
+                color: 0x10B981
+            });
+            makeObjectInteractive(sphereId);
+            
+            // Avatar de démonstration
+            editor.createAvatar({
+                position: { x: 0, y: 0, z: 2 },
+                bodyColor: 0x4A90E2
+            });
+            
+            updateStats();
+        }, 500);
+        
+        console.log('🎯 3D Editor JavaScript Pur initialisé!');
+        console.log('📚 Bibliothèque modulaire et framework-agnostic');
+        console.log('🚀 Version:', editor.getVersion());
+    </script>
+</body>
 </html>

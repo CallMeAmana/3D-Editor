@@ -1,28 +1,29 @@
 {
-  "name": "3d-editor-library",
+  "name": "3d-editor-pure-javascript",
   "version": "1.0.0",
-  "description": "Bibliothèque 3D modulaire et indépendante de tout framework",
+  "description": "Bibliothèque 3D modulaire et framework-agnostic en JavaScript pur",
   "type": "module",
   "main": "lib/3DEditor.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve-examples": "vite --config vite.examples.config.js"
+    "examples": "vite --config vite.examples.config.js"
   },
   "keywords": [
     "3d",
     "editor",
-    "threejs",
     "javascript",
+    "pure",
     "modular",
     "framework-agnostic",
+    "threejs",
     "unity-style",
     "spatial",
     "exhibition",
     "avatar"
   ],
-  "author": "Votre Nom",
+  "author": "Étudiant",
   "license": "MIT",
   "dependencies": {
     "three": "^0.178.0"
@@ -40,6 +41,7 @@
   "files": [
     "lib/",
     "examples/",
-    "README.md"
+    "README.md",
+    "index.html"
   ]
 }
