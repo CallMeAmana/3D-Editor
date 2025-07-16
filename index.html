@@ -1,263 +1,251 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Editor - Bibliothèque JavaScript Pure</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            overflow: hidden;
+    <link href="./src/style.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(222.2 84% 4.9%)",
+                        foreground: "hsl(210 40% 98%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(217.2 32.6% 17.5%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 62.8% 30.6%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(217.2 32.6% 17.5%)",
+                            foreground: "hsl(215 20.2% 65.1%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(217.2 32.6% 17.5%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(222.2 84% 4.9%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(222.2 84% 4.9%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                    },
+                }
+            }
         }
-        
-        .container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            background: linear-gradient(45deg, #4F46E5, #06B6D4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .header-info {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .main-content {
-            flex: 1;
-            display: flex;
-        }
-        
-        .canvas-container {
-            flex: 1;
-            position: relative;
-        }
-        
-        .sidebar {
-            width: 300px;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            overflow-y: auto;
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .section {
-            margin-bottom: 25px;
-        }
-        
-        .section h3 {
-            margin: 0 0 15px 0;
-            color: #4F46E5;
-            font-size: 16px;
-            border-bottom: 1px solid rgba(79, 70, 229, 0.3);
-            padding-bottom: 5px;
-        }
-        
-        .button-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #4F46E5, #7C3AED);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-        }
-        
-        .btn-full {
-            grid-column: 1 / -1;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .stats {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .stats div {
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .stats .value {
-            color: #4F46E5;
-            font-weight: bold;
-        }
-        
-        .selected-info {
-            background: rgba(79, 70, 229, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 12px;
-        }
-        
-        .shortcuts {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            line-height: 1.4;
-        }
-        
-        .shortcuts strong {
-            color: #4F46E5;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>3D Editor - Bibliothèque JavaScript Pure</h1>
-            <div class="header-info">
-                <span>Framework-Agnostic</span>
-                <span>•</span>
-                <span>Modulaire</span>
-                <span>•</span>
-                <span id="version">v1.0.0</span>
+<body class="bg-background text-foreground">
+    <div class="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <!-- Sidebar -->
+        <div class="w-80 bg-card/50 backdrop-blur-sm border-r border-border p-6 overflow-y-auto">
+            <div class="space-y-6">
+                <!-- Header -->
+                <div class="text-center">
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        3D Editor
+                    </h1>
+                    <p class="text-sm text-muted-foreground mt-1">JavaScript Pure & Modulaire</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="card p-4">
+                    <h3 class="font-semibold mb-3 text-sm">📊 Statistiques</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Objets:</span>
+                            <span id="object-count" class="font-mono text-blue-400">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Avatars:</span>
+                            <span id="avatar-count" class="font-mono text-green-400">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Expositions:</span>
+                            <span id="exhibition-count" class="font-mono text-purple-400">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Version:</span>
+                            <span id="version" class="font-mono text-yellow-400">v1.0.0</span>
+                        </div>
+                    </div>
+                    <div id="selected-info" class="mt-3 p-2 bg-blue-500/10 rounded border border-blue-500/20 hidden">
+                        <div class="text-xs text-blue-400">
+                            <strong>Sélectionné:</strong> <span id="selected-id"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Objects Section -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        🎲 Objets 3D
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="addCube()" class="btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Cube
+                        </button>
+                        <button onclick="addSphere()" class="btn bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Sphère
+                        </button>
+                        <button onclick="addCylinder()" class="btn bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Cylindre
+                        </button>
+                        <button onclick="addPlane()" class="btn bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Avatars Section -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        👤 Avatars (Spatial.io Style)
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="createAvatar()" class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            Créer Avatar Simple
+                        </button>
+                        <button onclick="document.getElementById('avatar-file').click()" class="btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            Charger Avatar GLB/GLTF
+                        </button>
+                        <input type="file" id="avatar-file" class="hidden" accept=".glb,.gltf" onchange="loadAvatar(this)">
+                    </div>
+                </div>
+
+                <!-- Exhibition Section -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        🏛️ Exposition (VExhibition Style)
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="createRoom()" class="btn bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Salle
+                        </button>
+                        <button onclick="addArtwork()" class="btn bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Œuvre
+                        </button>
+                        <button onclick="addLighting()" class="btn bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Éclairage
+                        </button>
+                        <button onclick="createPath()" class="btn bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Parcours
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactions Section -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        ⚡ Interactions
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="create3DButton()" class="btn bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Bouton 3D
+                        </button>
+                        <button onclick="createZone()" class="btn bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 text-xs rounded-md transition-colors">
+                            Zone
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Unity Tools Section -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        🛠️ Outils (Unity Style)
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="setMode('translate')" id="btn-translate" class="btn bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            🔄 Déplacer (W)
+                        </button>
+                        <button onclick="setMode('rotate')" id="btn-rotate" class="btn bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            🔄 Rotation (E)
+                        </button>
+                        <button onclick="setMode('scale')" id="btn-scale" class="btn bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            📏 Échelle (R)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scene Management -->
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        💾 Gestion Scène
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="exportScene()" class="btn bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            📤 Exporter Scène
+                        </button>
+                        <button onclick="document.getElementById('scene-file').click()" class="btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            📥 Importer Scène
+                        </button>
+                        <button onclick="clearScene()" class="btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 text-xs rounded-md w-full transition-colors">
+                            🗑️ Vider Scène
+                        </button>
+                        <input type="file" id="scene-file" class="hidden" accept=".json" onchange="importScene(this)">
+                    </div>
+                </div>
+
+                <!-- Shortcuts -->
+                <div class="card p-4">
+                    <h3 class="font-semibold mb-3 text-sm">⌨️ Raccourcis</h3>
+                    <div class="text-xs text-muted-foreground space-y-1">
+                        <div><kbd class="bg-muted px-1 rounded">W</kbd> Mode déplacement</div>
+                        <div><kbd class="bg-muted px-1 rounded">E</kbd> Mode rotation</div>
+                        <div><kbd class="bg-muted px-1 rounded">R</kbd> Mode échelle</div>
+                        <div><kbd class="bg-muted px-1 rounded">Del</kbd> Supprimer</div>
+                        <div><kbd class="bg-muted px-1 rounded">Clic</kbd> Sélectionner</div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="main-content">
-            <div class="canvas-container" id="canvas-container"></div>
+
+        <!-- Main Canvas Area -->
+        <div class="flex-1 relative">
+            <div id="canvas-container" class="w-full h-full"></div>
             
-            <div class="sidebar">
-                <div class="section">
-                    <h3>🎲 Objets 3D</h3>
-                    <div class="button-grid">
-                        <button class="btn" onclick="addCube()">Cube</button>
-                        <button class="btn" onclick="addSphere()">Sphère</button>
-                        <button class="btn" onclick="addCylinder()">Cylindre</button>
-                        <button class="btn" onclick="addPlane()">Plan</button>
+            <!-- Top Bar -->
+            <div class="absolute top-4 left-4 right-4 flex justify-between items-center">
+                <div class="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-border">
+                    <h2 class="text-lg font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        Éditeur 3D - Framework Agnostic
+                    </h2>
+                </div>
+                <div class="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-border">
+                    <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span class="flex items-center gap-1">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            JavaScript Pur
+                        </span>
+                        <span>•</span>
+                        <span>Modulaire</span>
+                        <span>•</span>
+                        <span>Unity + Spatial.io + VExhibition</span>
                     </div>
                 </div>
-                
-                <div class="section">
-                    <h3>👤 Avatars</h3>
-                    <div class="button-grid">
-                        <button class="btn" onclick="createAvatar()">Créer Avatar</button>
-                        <button class="btn btn-success" onclick="document.getElementById('avatar-file').click()">
-                            Charger GLB
-                        </button>
-                    </div>
-                    <input type="file" id="avatar-file" class="file-input" accept=".glb,.gltf" onchange="loadAvatar(this)">
-                </div>
-                
-                <div class="section">
-                    <h3>🏛️ Exposition</h3>
-                    <div class="button-grid">
-                        <button class="btn" onclick="createRoom()">Salle</button>
-                        <button class="btn" onclick="addArtwork()">Œuvre</button>
-                        <button class="btn" onclick="addLighting()">Éclairage</button>
-                        <button class="btn" onclick="createPath()">Parcours</button>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <h3>⚡ Interactions</h3>
-                    <div class="button-grid">
-                        <button class="btn" onclick="create3DButton()">Bouton 3D</button>
-                        <button class="btn" onclick="createZone()">Zone</button>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <h3>🛠️ Outils (Unity Style)</h3>
-                    <div class="button-grid">
-                        <button class="btn" onclick="setMode('translate')" id="btn-translate">Déplacer (W)</button>
-                        <button class="btn" onclick="setMode('rotate')" id="btn-rotate">Rotation (E)</button>
-                        <button class="btn" onclick="setMode('scale')" id="btn-scale">Échelle (R)</button>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <h3>💾 Scène</h3>
-                    <div class="button-grid">
-                        <button class="btn btn-success" onclick="exportScene()">Exporter</button>
-                        <button class="btn btn-warning" onclick="document.getElementById('scene-file').click()">
-                            Importer
-                        </button>
-                        <button class="btn btn-full" onclick="clearScene()">Vider Scène</button>
-                    </div>
-                    <input type="file" id="scene-file" class="file-input" accept=".json" onchange="importScene(this)">
-                </div>
-                
-                <div class="section">
-                    <h3>📊 Statistiques</h3>
-                    <div class="stats">
-                        <div>Objets: <span class="value" id="object-count">0</span></div>
-                        <div>Avatars: <span class="value" id="avatar-count">0</span></div>
-                        <div>Expositions: <span class="value" id="exhibition-count">0</span></div>
-                        <div>Œuvres: <span class="value" id="artwork-count">0</span></div>
-                    </div>
-                    <div id="selected-info" class="selected-info" style="display: none;">
-                        <strong>Sélectionné:</strong> <span id="selected-id"></span>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <h3>⌨️ Raccourcis</h3>
-                    <div class="shortcuts">
-                        <strong>W</strong> - Mode déplacement<br>
-                        <strong>E</strong> - Mode rotation<br>
-                        <strong>R</strong> - Mode échelle<br>
-                        <strong>Delete</strong> - Supprimer objet<br>
-                        <strong>Clic</strong> - Sélectionner<br>
-                        <strong>Molette</strong> - Zoom caméra
-                    </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading" class="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                    <p class="text-muted-foreground">Initialisation de l'éditeur 3D...</p>
                 </div>
             </div>
         </div>
@@ -266,19 +254,24 @@
     <script type="module">
         import Editor3D from './lib/3DEditor.js';
         
-        // Initialiser l'éditeur 3D
+        // Hide loading after a short delay
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 1000);
+        
+        // Initialize 3D Editor
         const container = document.getElementById('canvas-container');
         const editor = new Editor3D(container, {
             enableShadows: true,
             enableGrid: true,
-            backgroundColor: 0x2a2a2a
+            backgroundColor: 0x1a1a2e
         });
         
-        // Variables globales
+        // Global reference
         window.editor = editor;
         let currentMode = 'translate';
         
-        // Mettre à jour les statistiques
+        // Update stats
         function updateStats() {
             const stats = editor.getStats();
             document.getElementById('object-count').textContent = stats.objects;
@@ -288,21 +281,38 @@
             document.getElementById('version').textContent = `v${editor.getVersion()}`;
         }
         
-        // Mettre à jour l'interface du mode actuel
+        // Update mode UI
         function updateModeUI(mode) {
-            // Reset tous les boutons
             ['translate', 'rotate', 'scale'].forEach(m => {
                 const btn = document.getElementById(`btn-${m}`);
-                btn.style.background = 'linear-gradient(135deg, #4F46E5, #7C3AED)';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-slate-600', 'hover:bg-slate-700');
             });
             
-            // Highlight le mode actuel
             const activeBtn = document.getElementById(`btn-${mode}`);
-            activeBtn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+            activeBtn.classList.remove('bg-slate-600', 'hover:bg-slate-700');
+            activeBtn.classList.add('bg-green-600', 'hover:bg-green-700');
             currentMode = mode;
         }
         
-        // Fonctions pour les objets 3D
+        // Show selected info
+        function showSelectedInfo(id) {
+            document.getElementById('selected-info').classList.remove('hidden');
+            document.getElementById('selected-id').textContent = id;
+        }
+        
+        // Make object interactive
+        function makeObjectInteractive(id) {
+            editor.makeObjectInteractive(id, {
+                onClick: (object) => {
+                    editor.selectObject(object.userData.id);
+                    showSelectedInfo(object.userData.id);
+                },
+                hoverColor: 0x00ff88
+            });
+        }
+        
+        // Object functions
         window.addCube = () => {
             const id = editor.addCube({
                 position: { x: Math.random() * 4 - 2, y: 0.5, z: Math.random() * 4 - 2 },
@@ -328,31 +338,14 @@
         };
         
         window.addPlane = () => {
-            const id = editor.addObject('plane', {
+            const id = editor.engine.addObject('plane', {
                 position: { x: Math.random() * 4 - 2, y: 0, z: Math.random() * 4 - 2 },
                 color: Math.random() * 0xffffff
             });
             makeObjectInteractive(id);
         };
         
-        // Rendre un objet interactif
-        function makeObjectInteractive(id) {
-            editor.makeObjectInteractive(id, {
-                onClick: (object) => {
-                    editor.selectObject(object.userData.id);
-                    showSelectedInfo(object.userData.id);
-                },
-                hoverColor: 0x00ff00
-            });
-        }
-        
-        // Afficher les infos de l'objet sélectionné
-        function showSelectedInfo(id) {
-            document.getElementById('selected-info').style.display = 'block';
-            document.getElementById('selected-id').textContent = id;
-        }
-        
-        // Fonctions pour les avatars
+        // Avatar functions
         window.createAvatar = () => {
             editor.createAvatar({
                 position: { x: Math.random() * 4 - 2, y: 0, z: Math.random() * 4 - 2 },
@@ -370,21 +363,19 @@
                 }).then(() => {
                     console.log('Avatar chargé avec succès');
                 }).catch(error => {
-                    console.error('Erreur lors du chargement:', error);
-                    alert('Erreur lors du chargement de l\'avatar');
+                    console.error('Erreur:', error);
                 });
             }
         };
         
-        // Fonctions pour les expositions
+        // Exhibition functions
         window.createRoom = () => {
             editor.createExhibitionRoom({
                 width: 10,
                 height: 3,
                 depth: 8,
                 wallColor: 0xf5f5f5,
-                floorColor: 0xe8e8e8,
-                ceilingColor: 0xfafafa
+                floorColor: 0xe8e8e8
             });
         };
         
@@ -395,8 +386,7 @@
                 position: { x: -4, y: 1.5, z: Math.random() * 2 - 1 },
                 title: `Œuvre ${Date.now()}`,
                 artist: 'Artiste Virtuel',
-                color: Math.random() * 0xffffff,
-                frameColor: 0x8B4513
+                color: Math.random() * 0xffffff
             });
         };
         
@@ -404,8 +394,7 @@
             editor.addExhibitionLighting({
                 position: { x: Math.random() * 4 - 2, y: 2.5, z: Math.random() * 4 - 2 },
                 target: { x: -4, y: 1.5, z: 0 },
-                intensity: 1.2,
-                color: 0xffffff
+                intensity: 1.2
             });
         };
         
@@ -414,16 +403,15 @@
                 { x: -3, y: 0.1, z: -3 },
                 { x: 0, y: 0.1, z: -3 },
                 { x: 3, y: 0.1, z: 0 },
-                { x: 0, y: 0.1, z: 3 },
-                { x: -3, y: 0.1, z: 3 }
+                { x: 0, y: 0.1, z: 3 }
             ];
             editor.exhibitions.createVisitPath(points, {
-                color: 0x00ff00,
+                color: 0x00ff88,
                 opacity: 0.7
             });
         };
         
-        // Fonctions pour les interactions
+        // Interaction functions
         window.create3DButton = () => {
             editor.create3DButton('Cliquez-moi!', 
                 { x: 2, y: 1, z: 2 },
@@ -431,10 +419,7 @@
                     width: 2,
                     height: 0.6,
                     color: 0x4F46E5,
-                    hoverColor: 0x7C3AED,
-                    onClick: () => {
-                        alert('Bouton 3D JavaScript pur cliqué!');
-                    }
+                    onClick: () => alert('Bouton 3D JavaScript pur!')
                 }
             );
         };
@@ -444,22 +429,19 @@
                 { x: 0, y: 0.5, z: -3 },
                 { x: 2, y: 1, z: 2 },
                 {
-                    onClick: () => {
-                        console.log('Zone interactive activée!');
-                        alert('Zone interactive JavaScript pur!');
-                    },
+                    onClick: () => alert('Zone interactive!'),
                     debug: true
                 }
             );
         };
         
-        // Fonctions pour les outils
+        // Tool functions
         window.setMode = (mode) => {
             editor.setTransformMode(mode);
             updateModeUI(mode);
         };
         
-        // Fonctions pour la scène
+        // Scene functions
         window.exportScene = () => {
             const sceneData = editor.exportScene();
             const blob = new Blob([sceneData], { type: 'application/json' });
@@ -478,10 +460,9 @@
                 reader.onload = (e) => {
                     try {
                         editor.importScene(e.target.result);
-                        console.log('Scène importée avec succès');
+                        console.log('Scène importée');
                     } catch (error) {
-                        console.error('Erreur lors de l\'import:', error);
-                        alert('Erreur lors de l\'import de la scène');
+                        console.error('Erreur import:', error);
                     }
                 };
                 reader.readAsText(file);
@@ -489,29 +470,16 @@
         };
         
         window.clearScene = () => {
-            if (confirm('Êtes-vous sûr de vouloir vider la scène ?')) {
-                // Supprimer tous les objets
-                const stats = editor.getStats();
+            if (confirm('Vider la scène ?')) {
                 editor.engine.objects.forEach((obj, id) => {
                     editor.removeObject(id);
                 });
-                
-                // Réinitialiser les systèmes
-                editor.avatars.dispose();
-                editor.exhibitions.dispose();
-                editor.interactions.dispose();
-                
-                // Réinitialiser les modules
-                editor.avatars = new editor.constructor.AvatarSystem(editor.engine);
-                editor.exhibitions = new editor.constructor.ExhibitionSystem(editor.engine);
-                editor.interactions = new editor.constructor.InteractionSystem(editor.engine);
-                
                 updateStats();
-                document.getElementById('selected-info').style.display = 'none';
+                document.getElementById('selected-info').classList.add('hidden');
             }
         };
         
-        // Écouter les événements de l'éditeur
+        // Event listeners
         editor.on('objectAdded', updateStats);
         editor.on('objectRemoved', updateStats);
         editor.on('avatarCreated', updateStats);
@@ -523,44 +491,40 @@
         });
         
         editor.on('objectDeselected', () => {
-            document.getElementById('selected-info').style.display = 'none';
+            document.getElementById('selected-info').classList.add('hidden');
         });
         
         editor.on('transformModeChanged', (data) => {
             updateModeUI(data.mode);
         });
         
-        // Initialiser l'interface
+        // Initialize
         updateStats();
         updateModeUI('translate');
         
-        // Ajouter quelques objets de démonstration
+        // Demo objects
         setTimeout(() => {
-            // Cube de démonstration
             const cubeId = editor.addCube({
                 position: { x: -1, y: 0.5, z: 0 },
                 color: 0x4F46E5
             });
             makeObjectInteractive(cubeId);
             
-            // Sphère de démonstration
             const sphereId = editor.addSphere({
                 position: { x: 1, y: 0.5, z: 0 },
                 color: 0x10B981
             });
             makeObjectInteractive(sphereId);
             
-            // Avatar de démonstration
             editor.createAvatar({
                 position: { x: 0, y: 0, z: 2 },
                 bodyColor: 0x4A90E2
             });
             
             updateStats();
-        }, 500);
+        }, 1500);
         
         console.log('🎯 3D Editor JavaScript Pur initialisé!');
-        console.log('📚 Bibliothèque modulaire et framework-agnostic');
         console.log('🚀 Version:', editor.getVersion());
     </script>
 </body>
